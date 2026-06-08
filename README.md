@@ -145,3 +145,77 @@ which is more educational than using a black-box vector database.
 - *What I changed or overrode:* I kept the same chunk and query interfaces so the rest
   of the pipeline didn't need to change. I also decided to keep this approach permanently
   rather than trying to fix ChromaDB, because it's simpler and sufficient for my dataset size
+  ---
+
+## Sample Chunks
+
+**Chunk 1** (source: csusm_campus_coffee.txt)
+It's a cute coffee cart. Located near academic hall and one of the science halls.
+They are all friendly and speedy but if you don't get there fast enough they run
+out quick. Family owned business, the workers are so friendly and warm.
+
+**Chunk 2** (source: csusm_reddit_dining.txt)
+I chose CSUSM because of its affordability, and now I have to pay an extra 3k
+for a meal plan I have to walk to the Quad for? What's the point of my kitchen?
+
+**Chunk 3** (source: csusm_niche_reviews.txt)
+CAMPUS FOOD RATING: B+ AVERAGE MEAL PLAN COST: $5,226 per year
+MEAL PLAN AVAILABLE: Yes STUDENT POLL - Best food options on campus:
+The Student Union: 45%, New cafeteria with many options: 16%
+
+**Chunk 4** (source: csusm_kalamata_mediterranean.txt)
+Vegan options available: Moroccan Couscous, Cucumber Salad, Pickled Onions,
+Lemon Wedge, Greek Olives, Hummus, Pepperoncini, Falafel (4) & Sauce,
+Dolma, Turmeric Basmati Rice, Mediterranean Couscous
+
+**Chunk 5** (source: csusm_dining_locations.txt)
+Cougar Cart now available Monday - Friday 8am-12pm South Campus/Founders Plaza
+serving beverages, snacks, sandwiches and wraps. Campus Coffee: Closed.
+Shake Smart: Now Open!
+
+---
+
+## Retrieval Test Results
+
+**Query 1: "What vegan options are available on campus?"**
+Top chunks returned: csusm_kalamata_mediterranean.txt, csusm_reddit_dining.txt, csusm_niche_reviews.txt
+Why relevant: The Kalamata chunk directly lists vegan menu items. The Reddit chunk mentions dietary preferences in meal plan discussions. The Niche chunk mentions dining options generally.
+
+**Query 2: "Is the meal plan worth it?"**
+Top chunks returned: csusm_reddit_dining.txt, csusm_reddit_dining.txt, csusm_yelp_reviews.txt
+Why relevant: Reddit chunks contain direct student opinions about meal plan value and cost. These are the most semantically similar to the question because students used phrases like "meal plan worth it" directly in their posts.
+
+**Query 3: "What time does Campus Coffee open?"**
+Top chunks returned: csusm_campus_coffee.txt, csusm_campus_coffee.txt, csusm_campus_way_cafe.txt
+Why relevant: Correctly identified the campus coffee document as most relevant. However the document didn't contain hours — showing retrieval worked but document content was incomplete.
+
+---
+
+## Example Responses
+
+**Response 1 — Vegan options (accurate):**
+> Question: What vegan options are available on campus?
+> Answer: According to csusm_kalamata_mediterranean.txt, the following vegan options are available: Moroccan Couscous, Cucumber Salad, Hummus, Falafel & Sauce, Dolma, Turmeric Basmati Rice, and Mediterranean Couscous.
+> Sources: csusm_kalamata_mediterranean.txt, csusm_reddit_dining.txt, csusm_niche_reviews.txt
+
+**Response 2 — Meal plan (accurate with citation):**
+> Question: Is the meal plan worth it?
+> Answer: According to csusm_reddit_dining.txt, one student stated "I chose CSUSM because of its affordability, and now I have to pay an extra 3k for a meal plan." This suggests at least some students do not consider it worth the cost.
+> Sources: csusm_reddit_dining.txt, csusm_yelp_reviews.txt
+
+**Response 3 — Out of scope (refusal):**
+> Question: What food stations are in Campus Way Cafe?
+> Answer: I don't have that information. The provided context only mentions Campus Way Cafe as a location for a food drive and does not provide information about the food stations available there.
+> Sources: csusm_campus_way_cafe.txt, csusm_facebook.txt, csusm_reddit_dining.txt
+
+---
+
+## Query Interface
+
+**Input fields:** Plain text question typed into a text box or selected from example buttons
+
+**Output fields:**
+- Answer text — grounded response from retrieved documents
+- Sources list — which document files the answer was drawn from
+
+**Sample interaction transcript:**
